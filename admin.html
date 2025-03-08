@@ -4,231 +4,242 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Safe Car Rental</title>
-  <!-- 引入 Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- 引入 Font Awesome 图标库 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
+      margin: 0; 
+      padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background: white;
     }
-    /* 卡片样式：去掉蓝色边框，改为轻微阴影 */
-    .card-custom {
-      border: none; /* 无边框 */
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      border-radius: 10px;
-      padding: 15px;
-      position: relative;
+    .blue-rectangle {
+      width: 90%;
+      max-width: 1400px;
+      margin: 50px auto;
+      background: #007bff;
+      border-radius: 20px;
+      overflow: hidden;
+      padding-bottom: 50px;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      color: #fff;
+    }
+    .header h1 {
+      font-size: clamp(60px, 10vw, 120px);
+      margin: 0; 
+      font-weight: bold;
+    }
+    .header h3 {
+      font-size: 24px; 
+      margin: 10px 0 0 0;
+      color: #e0f0ff;
+    }
+    .white-container {
+      background: #fff;
+      border-radius: 20px;
+      margin: 0 20px;
+      padding: 20px;
+    }
+    .white-container h2 {
+      margin-top: 0; 
+      color: #007bff;
+      font-size: 20px; /* 比 Safe Car Rental (24px) 更小 */
+    }
+    /* 筛选区 + 一列一车 */
+    .filter-container {
+      text-align: center;
       margin-bottom: 20px;
+    }
+    .filter-group {
+      margin-bottom: 10px; 
+    }
+    .filter-group label {
+      font-size: 14px;
+      margin-right: 5px;
+    }
+    .filter-group select {
+      font-size: 14px;
+      padding: 8px;
+      border-radius: 5px;
+      margin: 0 5px 0 0;
+    }
+    .car-list {
+      display: grid;
+      grid-template-columns: 1fr; /* 一列一车 */
+      gap: 20px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    .car {
+      background: #fff;
+      padding: 15px;
+      border-radius: 20px;
+      border: 4px solid #007bff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      text-align: center;
+      color: #333;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    .card-custom:hover {
+    .car:hover {
       transform: scale(1.02);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
     }
-    /* 图片 */
-    .card-custom img {
-      max-width: 100%;
-      height: 200px; /* 保持200px高度 */
+    .car img {
+      width: 100%; 
+      height: auto;
+      max-height: 250px; /* 限制图片最大高度，避免太大 */
       object-fit: contain;
-      border-radius: 5px;
-      margin-bottom: 10px;
+      margin: 10px auto; 
+      border-radius: 10px;
     }
-    /* 删除按钮 */
-    .delete-button {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      cursor: pointer;
-      color: white;
-    }
-    /* 文本框更大 */
-    textarea {
-      width: 100%;
-      min-height: 300px; /* 更高的编辑区 */
-      font-size: 16px;
-      line-height: 1.5;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      resize: vertical;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    textarea:focus {
-      outline: none;
-      border-color: #007bff;
-      box-shadow: 0 0 5px rgba(0,123,255,0.5);
-    }
-    /* 第一行加大加粗 */
+    /* 第一行加粗加大 */
     .car-title {
-      font-size: 20px;
+      font-size: 20px; /* 调大一些 */
       font-weight: bold;
-      margin-bottom: 5px;
-    }
-    /* 其余行保持原样 */
-    .car-details {
-      font-size: 16px;
-      white-space: pre-line;
+      white-space: pre-line; 
+      margin-top: 10px; 
       color: #333;
+    }
+    /* 其余文字也稍微加大 */
+    .car-details {
+      font-size: 18px; 
+      white-space: pre-line;
+      margin-top: 5px; 
+      color: #333;
+    }
+    .footer {
+      background: #0056b3; 
+      color: #fff;
+      text-align: center;
+      padding: 45px;
+      font-size: 14px; 
+      line-height: 1.6;
+      width: 90%; 
+      max-width: 1400px;
+      margin: 50px auto 0 auto; 
+      border-radius: 20px;
+    }
+    /* 移动端放大下拉框和标签，并减少margin */
+    @media (max-width: 600px) {
+      .filter-container {
+        margin-bottom: 10px; 
+      }
+      .filter-group {
+        margin-bottom: 6px; 
+      }
+      .filter-group label,
+      .filter-group select {
+        font-size: 18px; 
+      }
+      .filter-group select {
+        padding: 12px;  
+      }
+      .blue-rectangle {
+        margin: 20px auto;
+        padding-bottom: 20px;
+      }
+      .header {
+        padding: 10px 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container my-4">
-    <h2 class="mb-3">Admin - Manage Cars</h2>
-    <!-- 消息显示区域 -->
-    <div id="messageArea"></div>
-    <!-- 功能按钮区域 -->
-    <div class="mb-3">
-      <button class="btn btn-success me-2" onclick="addCar()">
-        <i class="fas fa-plus"></i> Add New Car
-      </button>
-      <button class="btn btn-primary me-2" onclick="sortByPrice()">
-        <i class="fas fa-sort-numeric-down"></i> Sort by Price
-      </button>
-      <button class="btn btn-danger" onclick="batchDelete()">
-        <i class="fas fa-trash"></i> Batch Delete
-      </button>
+  <div class="blue-rectangle">
+    <div class="header">
+      <h1>安全车行</h1>
+      <h3>Safe Car Rental</h3>
     </div>
-    <!-- 车辆列表：小屏幕1列，中屏幕及以上2列 -->
-    <div class="row" id="carList"></div>
+    <div class="white-container">
+      <h2>Available Cars</h2>
+      <div class="filter-container">
+        <div class="filter-group">
+          <label for="rentalType">租期：</label>
+          <select id="rentalType" onchange="filterCars()">
+            <option value="day">日租</option>
+            <option value="week">周租</option>
+            <option value="month">月租</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="priceRange">价格区间：</label>
+          <select id="priceRange" onchange="filterCars()">
+            <option value="all">全部</option>
+            <option value="range1">0 - 1000</option>
+            <option value="range2">1000 - 3000</option>
+            <option value="range3">3000 - 5000</option>
+            <option value="range4">> 5000</option>
+          </select>
+        </div>
+      </div>
+      <div class="car-list" id="carList"></div>
+    </div>
   </div>
-  
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <div class="footer">
+    <p>📞 Phone / LINE / WhatsApp: +66 0937851189</p>
+    <p>📧 Email: zfg77@qq.com</p>
+    <p>📍 Address: 888 Ratchadaphisek Rd. Din Daeng, Bangkok 10400, Thailand</p>
+  </div>
+
   <script>
     let carsData = JSON.parse(localStorage.getItem("carsData")) || [];
 
-    // 显示提示信息
-    function showMessage(message, type="success") {
-      const msgDiv = document.getElementById("messageArea");
-      msgDiv.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                              ${message}
-                              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                           </div>`;
-      setTimeout(() => {
-        const alert = bootstrap.Alert.getInstance(msgDiv.querySelector('.alert'));
-        if (alert) alert.close();
-      }, 3000);
-    }
+    function filterCars() {
+      let rentalType = document.getElementById("rentalType").value;
+      let priceRange = document.getElementById("priceRange").value;
+      let [minPrice, maxPrice] = getRange(priceRange);
 
-    // 添加新车
-    function addCar() {
-      carsData.push({ text: "新车名称行1\n新车名称行2\n日租：0\n周租：0\n月租：0", image: "", selected: false });
-      saveData();
-      renderCars();
-      showMessage("New car added.", "success");
-    }
-
-    // 删除
-    function deleteCar(index) {
-      if (confirm("Are you sure you want to delete this car?")) {
-        carsData.splice(index, 1);
-        saveData();
-        renderCars();
-        showMessage("Car deleted successfully.", "success");
-      }
-    }
-
-    // 图片更新
-    function updateImage(event, index) {
-      let file = event.target.files[0];
-      if (file) {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-          carsData[index].image = e.target.result;
-          saveData();
-          renderCars();
-          showMessage("Image updated successfully.", "success");
-        }
-        reader.readAsDataURL(file);
-      }
-    }
-
-    // 文本更新
-    function updateText(event, index) {
-      carsData[index].text = event.target.value;
-      saveData();
-      showMessage("Text updated successfully.", "success");
-    }
-
-    // 保存
-    function saveData() {
-      localStorage.setItem("carsData", JSON.stringify(carsData));
-    }
-
-    // 按日租排序
-    function sortByPrice() {
-      carsData.sort((a, b) => {
-        let priceA = extractPrice(a.text);
-        let priceB = extractPrice(b.text);
-        return priceA - priceB;
+      let filtered = carsData.filter(car => {
+        let price = getPriceByRentalType(car.text, rentalType);
+        return (price >= minPrice && price <= maxPrice);
       });
-      saveData();
-      renderCars();
-      showMessage("Cars sorted by price.", "success");
+      renderCars(filtered);
     }
 
-    // 提取日租
-    function extractPrice(text) {
-      let match = text.match(/日租：(\d+)/);
+    function getRange(rangeKey) {
+      switch(rangeKey){
+        case "range1": return [0, 1000];
+        case "range2": return [1000, 3000];
+        case "range3": return [3000, 5000];
+        case "range4": return [5000, Infinity];
+        default: return [0, Infinity];
+      }
+    }
+
+    function getPriceByRentalType(text, rentalType) {
+      let pattern;
+      if (rentalType === "day") {
+        pattern = /日租：(\d+)/;
+      } else if (rentalType === "week") {
+        pattern = /周租：(\d+)/;
+      } else {
+        pattern = /月租：(\d+)/;
+      }
+      let match = text.match(pattern);
       return match ? parseInt(match[1]) : Infinity;
     }
 
-    // 渲染
-    function renderCars() {
-      let carList = document.getElementById("carList");
+    function renderCars(filteredData = carsData) {
+      const carList = document.getElementById("carList");
       carList.innerHTML = "";
-      carsData.forEach((car, index) => {
-        // 拆分：第一行 => car-title, 其余 => car-details
+      filteredData.forEach(car => {
         let lines = car.text.split("\n");
-        let firstLine = lines[0] || "";             // 第一行
-        let restLines = lines.slice(1).join("\n"); // 其余行
+        let firstLine = lines[0] || ""; 
+        let restLines = lines.slice(1).join("\n");
 
-        let cardHtml = `
-          <div class="col-12 col-md-6">
-            <div class="card-custom">
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" ${car.selected ? "checked" : ""} onchange="toggleSelect(${index}, this)">
-              </div>
-              <button class="btn btn-danger btn-sm delete-button" onclick="deleteCar(${index})">
-                <i class="fas fa-trash"></i>
-              </button>
-              <img src="${car.image || 'placeholder.jpg'}" alt="Car Image">
-              <label class="form-label">Upload Image:
-                <input type="file" class="form-control form-control-sm" onchange="updateImage(event, ${index})">
-              </label>
-              <!-- 第一行大号加粗 -->
-              <div class="car-title">${firstLine}</div>
-              <!-- 剩余行保持原样 -->
-              <div class="car-details">${restLines}</div>
-              <!-- 仍然把全部文本放进textarea供编辑 -->
-              <textarea class="form-control mt-2" oninput="updateText(event, ${index})">${car.text}</textarea>
-            </div>
-          </div>
+        let newCar = document.createElement("div");
+        newCar.classList.add("car");
+        newCar.innerHTML = `
+          <img src="${car.image || 'placeholder.jpg'}" alt="Car Image">
+          <div class="car-title">${firstLine}</div>
+          <div class="car-details">${restLines}</div>
         `;
-        carList.insertAdjacentHTML("beforeend", cardHtml);
+        carList.appendChild(newCar);
       });
     }
 
-    // 切换选中
-    function toggleSelect(index, checkbox) {
-      carsData[index].selected = checkbox.checked;
-      saveData();
-    }
-
-    // 批量删除
-    function batchDelete() {
-      if (confirm("Are you sure you want to delete selected cars?")) {
-        carsData = carsData.filter(car => !car.selected);
-        saveData();
-        renderCars();
-        showMessage("Selected cars deleted.", "success");
-      }
-    }
-
-    // 初始化
     renderCars();
   </script>
 </body>
