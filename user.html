@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Safe Car Rental</title>
+  <!-- 你原先的 CSS -->
+  <style>
+    body {
+      margin: 0; 
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: white;
+    }
+    .blue-rectangle {
+      width: 90%;
+      max-width: 1400px;
+      margin: 50px auto;
+      background: #007bff;
+      border-radius: 20px;
+      overflow: hidden;
+      padding-bottom: 50px;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+      color: #fff;
+    }
+    .header h1 {
+      font-size: clamp(60px, 10vw, 120px);
+      margin: 0; 
+      font-weight: bold;
+    }
+    .header h3 {
+      font-size: 24px; 
+      margin: 10px 0 0 0;
+      color: #e0f0ff;
+    }
+    .white-container {
+      background: #fff;
+      border-radius: 20px;
+      margin: 0 20px;
+      padding: 20px;
+    }
+    .white-container h2 {
+      margin-top: 0; 
+      color: #007bff;
+	font-size: 20px;
+    }
+    /* 筛选区 + 一列一车 */
+    .filter-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .filter-group {
+      margin-bottom: 10px; 
+    }
+    .filter-group label {
+      font-size: 14px;
+      margin-right: 5px;
+    }
+    .filter-group select {
+      font-size: 14px;
+      padding: 8px;
+      border-radius: 5px;
+      margin: 0 5px 0 0;
+    }
+    .car-list {
+      display: grid;
+      grid-template-columns: 1fr; /* 一列一车 */
+      gap: 20px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    .car {
+      background: #fff;
+      padding: 15px;
+      border-radius: 20px;
+      border: 4px solid #007bff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      text-align: center;
+      color: #333;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .car:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+    .car img {
+      width: 100%; 
+      height: auto;
+      object-fit: contain;
+      margin: 10px auto; 
+      border-radius: 10px;
+    }
+    /* 第一行加粗加大 */
+    .car-title {
+      font-size: 18px; 
+      font-weight: bold;
+      white-space: pre-line; 
+      margin-top: 10px; 
+      color: #333;
+    }
+    /* 其余文字保持原样 */
+    .car-details {
+      font-size: 16px; 
+      white-space: pre-line;
+      margin-top: 5px; 
+      color: #333;
+    }
+    .footer {
+      background: #0056b3; 
+      color: #fff;
+      text-align: center;
+      padding: 45px;
+      font-size: 14px; 
+      line-height: 1.6;
+      width: 90%; 
+      max-width: 1400px;
+      margin: 50px auto 0 auto; 
+      border-radius: 20px;
+    }
+    /* 移动端放大下拉框和标签，并减少margin */
+    @media (max-width: 600px) {
+      .filter-container {
+        margin-bottom: 10px; 
+      }
+      .filter-group {
+        margin-bottom: 6px; 
+      }
+      .filter-group label,
+      .filter-group select {
+        font-size: 18px; 
+      }
+      .filter-group select {
+        padding: 12px;  
+      }
+      .blue-rectangle {
+        margin: 20px auto;
+        padding-bottom: 20px;
+      }
+      .header {
+        padding: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 蓝色矩形 -->
+  <div class="blue-rectangle">
+    <div class="header">
+      <h1>安全车行</h1>
+      <h3>Safe Car Rental</h3>
+    </div>
+    <div class="white-container">
+      <h2>Available Cars</h2>
+      <div class="filter-container">
+        <div class="filter-group">
+          <label for="rentalType">租期：</label>
+          <select id="rentalType" onchange="filterCars()">
+            <option value="day">日租</option>
+            <option value="week">周租</option>
+            <option value="month">月租</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="priceRange">价格区间：</label>
+          <select id="priceRange" onchange="filterCars()">
+            <option value="all">全部</option>
+            <option value="range1">0 - 1000</option>
+            <option value="range2">1000 - 3000</option>
+            <option value="range3">3000 - 5000</option>
+            <option value="range4">> 5000</option>
+          </select>
+        </div>
+      </div>
+      <div class="car-list" id="carList"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>📞 Phone / LINE / WhatsApp: +66 0937851189</p>
+    <p>📧 Email: zfg77@qq.com</p>
+    <p>📍 Address: 888 Ratchadaphisek Rd. Din Daeng, Bangkok 10400, Thailand</p>
+  </div>
+
+  <script>
+    let carsData = JSON.parse(localStorage.getItem("carsData")) || [];
+
+    function filterCars() {
+      let rentalType = document.getElementById("rentalType").value;
+      let priceRange = document.getElementById("priceRange").value;
+      let [minPrice, maxPrice] = getRange(priceRange);
+
+      let filtered = carsData.filter(car => {
+        let price = getPriceByRentalType(car.text, rentalType);
+        return (price >= minPrice && price <= maxPrice);
+      });
+      renderCars(filtered);
+    }
+
+    function getRange(rangeKey) {
+      switch(rangeKey){
+        case "range1": return [0, 1000];
+        case "range2": return [1000, 3000];
+        case "range3": return [3000, 5000];
+        case "range4": return [5000, Infinity];
+        default: return [0, Infinity];
+      }
+    }
+
+    function getPriceByRentalType(text, rentalType) {
+      let pattern;
+      if (rentalType === "day") {
+        pattern = /日租：(\d+)/;
+      } else if (rentalType === "week") {
+        pattern = /周租：(\d+)/;
+      } else {
+        pattern = /月租：(\d+)/;
+      }
+      let match = text.match(pattern);
+      return match ? parseInt(match[1]) : Infinity;
+    }
+
+    // 这里仅拆分"第一行"和"其余行"；第一行加大加粗
+    function renderCars(filteredData = carsData) {
+      const carList = document.getElementById("carList");
+      carList.innerHTML = "";
+      filteredData.forEach(car => {
+        // 拆分第一行 & 剩余行
+        let lines = car.text.split("\n");
+        let firstLine = lines[0] || ""; 
+        let restLines = lines.slice(1).join("\n");
+
+        let newCar = document.createElement("div");
+        newCar.classList.add("car");
+        newCar.innerHTML = `
+          <img src="${car.image || 'placeholder.jpg'}" alt="Car Image">
+          <!-- 第一行加大加粗 -->
+          <div class="car-title">${firstLine}</div>
+          <!-- 剩余行保持原样 -->
+          <div class="car-details">${restLines}</div>
+        `;
+        carList.appendChild(newCar);
+      });
+    }
+
+    renderCars();
+  </script>
+</body>
+</html>

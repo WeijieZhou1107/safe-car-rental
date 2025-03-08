@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Safe Car Rental</title>
+  <!-- 引入 Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- 引入 Font Awesome 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    /* 卡片样式：去掉蓝色边框，改为轻微阴影 */
+    .card-custom {
+      border: none; /* 无边框 */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      border-radius: 10px;
+      padding: 15px;
+      position: relative;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card-custom:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    /* 图片 */
+    .card-custom img {
+      max-width: 100%;
+      height: 200px; /* 保持200px高度 */
+      object-fit: contain;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    /* 删除按钮 */
+    .delete-button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      cursor: pointer;
+      color: white;
+    }
+    /* 文本框更大 */
+    textarea {
+      width: 100%;
+      min-height: 300px; /* 更高的编辑区 */
+      font-size: 16px;
+      line-height: 1.5;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: vertical;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0,123,255,0.5);
+    }
+    /* 第一行加大加粗 */
+    .car-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    /* 其余行保持原样 */
+    .car-details {
+      font-size: 16px;
+      white-space: pre-line;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-4">
+    <h2 class="mb-3">Admin - Manage Cars</h2>
+    <!-- 消息显示区域 -->
+    <div id="messageArea"></div>
+    <!-- 功能按钮区域 -->
+    <div class="mb-3">
+      <button class="btn btn-success me-2" onclick="addCar()">
+        <i class="fas fa-plus"></i> Add New Car
+      </button>
+      <button class="btn btn-primary me-2" onclick="sortByPrice()">
+        <i class="fas fa-sort-numeric-down"></i> Sort by Price
+      </button>
+      <button class="btn btn-danger" onclick="batchDelete()">
+        <i class="fas fa-trash"></i> Batch Delete
+      </button>
+    </div>
+    <!-- 车辆列表：小屏幕1列，中屏幕及以上2列 -->
+    <div class="row" id="carList"></div>
+  </div>
+  
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    let carsData = JSON.parse(localStorage.getItem("carsData")) || [];
+
+    // 显示提示信息
+    function showMessage(message, type="success") {
+      const msgDiv = document.getElementById("messageArea");
+      msgDiv.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                              ${message}
+                              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                           </div>`;
+      setTimeout(() => {
+        const alert = bootstrap.Alert.getInstance(msgDiv.querySelector('.alert'));
+        if (alert) alert.close();
+      }, 3000);
+    }
+
+    // 添加新车
+    function addCar() {
+      carsData.push({ text: "新车名称行1\n新车名称行2\n日租：0\n周租：0\n月租：0", image: "", selected: false });
+      saveData();
+      renderCars();
+      showMessage("New car added.", "success");
+    }
+
+    // 删除
+    function deleteCar(index) {
+      if (confirm("Are you sure you want to delete this car?")) {
+        carsData.splice(index, 1);
+        saveData();
+        renderCars();
+        showMessage("Car deleted successfully.", "success");
+      }
+    }
+
+    // 图片更新
+    function updateImage(event, index) {
+      let file = event.target.files[0];
+      if (file) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+          carsData[index].image = e.target.result;
+          saveData();
+          renderCars();
+          showMessage("Image updated successfully.", "success");
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // 文本更新
+    function updateText(event, index) {
+      carsData[index].text = event.target.value;
+      saveData();
+      showMessage("Text updated successfully.", "success");
+    }
+
+    // 保存
+    function saveData() {
+      localStorage.setItem("carsData", JSON.stringify(carsData));
+    }
+
+    // 按日租排序
+    function sortByPrice() {
+      carsData.sort((a, b) => {
+        let priceA = extractPrice(a.text);
+        let priceB = extractPrice(b.text);
+        return priceA - priceB;
+      });
+      saveData();
+      renderCars();
+      showMessage("Cars sorted by price.", "success");
+    }
+
+    // 提取日租
+    function extractPrice(text) {
+      let match = text.match(/日租：(\d+)/);
+      return match ? parseInt(match[1]) : Infinity;
+    }
+
+    // 渲染
+    function renderCars() {
+      let carList = document.getElementById("carList");
+      carList.innerHTML = "";
+      carsData.forEach((car, index) => {
+        // 拆分：第一行 => car-title, 其余 => car-details
+        let lines = car.text.split("\n");
+        let firstLine = lines[0] || "";             // 第一行
+        let restLines = lines.slice(1).join("\n"); // 其余行
+
+        let cardHtml = `
+          <div class="col-12 col-md-6">
+            <div class="card-custom">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" ${car.selected ? "checked" : ""} onchange="toggleSelect(${index}, this)">
+              </div>
+              <button class="btn btn-danger btn-sm delete-button" onclick="deleteCar(${index})">
+                <i class="fas fa-trash"></i>
+              </button>
+              <img src="${car.image || 'placeholder.jpg'}" alt="Car Image">
+              <label class="form-label">Upload Image:
+                <input type="file" class="form-control form-control-sm" onchange="updateImage(event, ${index})">
+              </label>
+              <!-- 第一行大号加粗 -->
+              <div class="car-title">${firstLine}</div>
+              <!-- 剩余行保持原样 -->
+              <div class="car-details">${restLines}</div>
+              <!-- 仍然把全部文本放进textarea供编辑 -->
+              <textarea class="form-control mt-2" oninput="updateText(event, ${index})">${car.text}</textarea>
+            </div>
+          </div>
+        `;
+        carList.insertAdjacentHTML("beforeend", cardHtml);
+      });
+    }
+
+    // 切换选中
+    function toggleSelect(index, checkbox) {
+      carsData[index].selected = checkbox.checked;
+      saveData();
+    }
+
+    // 批量删除
+    function batchDelete() {
+      if (confirm("Are you sure you want to delete selected cars?")) {
+        carsData = carsData.filter(car => !car.selected);
+        saveData();
+        renderCars();
+        showMessage("Selected cars deleted.", "success");
+      }
+    }
+
+    // 初始化
+    renderCars();
+  </script>
+</body>
+</html>
